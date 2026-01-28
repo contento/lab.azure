@@ -1,0 +1,11 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+*.userprefs
+
+# Azure credentials - never commit these
+appsettings.Development.json
+*.secrets.json
