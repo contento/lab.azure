@@ -30,6 +30,9 @@ obj/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+appsettings.json
+appsettings.*.json
+!appsettings.example.json
 
 # IDEs
 .idea/
