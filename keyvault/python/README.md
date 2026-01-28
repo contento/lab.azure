@@ -6,6 +6,12 @@ and unit tests.
 
 Quick steps
 
+- **Optional:** Copy `.env.example` to `.env` and update with your values:
+  ```bash
+  cp .env.example .env
+  # Edit .env with your configuration
+  ```
+
 - Install runtime deps (optional, for real Azure use):
 
   **Using pip:**

@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
+using System;
 
 namespace AzureKeyVaultDemo;
 
@@ -13,9 +14,46 @@ class Program
             // Load configuration
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .Build();
+
+            var useLocal = configuration["USE_LOCAL"]?.Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
+
+            Console.WriteLine("=== Azure Key Vault Demo ===");
+
+            // Secret names to retrieve
+            var secretNames = new[] { "rosina-username-dev", "rosina-password-dev" };
+
+            if (useLocal)
+            {
+                Console.WriteLine("Mode: Local Development");
+                Console.WriteLine();
+
+                var localUsername = configuration["LOCAL_USERNAME"];
+                var localPassword = configuration["LOCAL_PASSWORD"];
+
+                if (string.IsNullOrEmpty(localUsername) || string.IsNullOrEmpty(localPassword))
+                {
+                    Console.WriteLine("Error: USE_LOCAL=true but LOCAL_USERNAME or LOCAL_PASSWORD not set.");
+                    Console.WriteLine("Set environment variables or update appsettings.json.");
+                    return;
+                }
+
+                Console.WriteLine("Using local secrets from environment variables...");
+                Console.WriteLine();
+
+                Console.WriteLine($"Secret: {secretNames[0]}");
+                Console.WriteLine($"  ✓ Value: {MaskSecret(localUsername)}");
+                Console.WriteLine();
+
+                Console.WriteLine($"Secret: {secretNames[1]}");
+                Console.WriteLine($"  ✓ Value: {MaskSecret(localPassword)}");
+                Console.WriteLine();
+
+                Console.WriteLine("=== Demo Complete (Local Mode) ===");
+                return;
+            }
 
             var keyVaultUrl = configuration["KeyVault:VaultUrl"];
 
@@ -23,10 +61,11 @@ class Program
             {
                 Console.WriteLine("Error: KeyVault:VaultUrl not found in configuration.");
                 Console.WriteLine("Please update appsettings.json with your Azure Key Vault URL.");
+                Console.WriteLine("Or set USE_LOCAL=true for local development mode.");
                 return;
             }
 
-            Console.WriteLine("=== Azure Key Vault Demo ===");
+            Console.WriteLine("Mode: Azure Key Vault");
             Console.WriteLine($"Key Vault URL: {keyVaultUrl}");
             Console.WriteLine();
 
@@ -40,9 +79,6 @@ class Program
             // 6. Interactive browser (if enabled)
             var credential = new DefaultAzureCredential();
             var client = new SecretClient(new Uri(keyVaultUrl), credential);
-
-            // Secret names to retrieve
-            var secretNames = new[] { "rosina-username-dev", "rosina-password-dev" };
 
             Console.WriteLine("Retrieving secrets from Azure Key Vault...");
             Console.WriteLine();

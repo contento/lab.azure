@@ -1,8 +1,18 @@
 import os
+from typing import Dict, Optional, Protocol
+
+
+class SecretStore(Protocol):
+    """Protocol defining the interface for secret stores."""
+    def get_secret(self, name: str) -> str:
+        """Retrieve a secret by name."""
+        ...
 
 
 class LocalSecretStore:
-    def __init__(self, secrets: dict):
+    """Local secret store for development and testing."""
+
+    def __init__(self, secrets: Optional[Dict[str, str]] = None) -> None:
         self._secrets = dict(secrets or {})
 
     def get_secret(self, name: str) -> str:
@@ -12,7 +22,9 @@ class LocalSecretStore:
 
 
 class AzureSecretStore:
-    def __init__(self, vault_name: str):
+    """Azure Key Vault secret store."""
+
+    def __init__(self, vault_name: str) -> None:
         try:
             from azure.identity import DefaultAzureCredential
             from azure.keyvault.secrets import SecretClient
@@ -30,7 +42,7 @@ class AzureSecretStore:
         return sec.value
 
 
-def make_secret_store_from_env():
+def make_secret_store_from_env() -> SecretStore:
     """Factory: choose AzureSecretStore when USE_AZURE=true and KEYVAULT_NAME set,
     otherwise a LocalSecretStore constructed from TEST_USERNAME/TEST_PASSWORD env vars.
     """

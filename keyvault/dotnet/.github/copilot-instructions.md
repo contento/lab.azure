@@ -26,7 +26,7 @@ What to document here (agents should write or update these fields):
 
 - Primary language: **C# / .NET 10.0**
 - Package manager: **NuGet** (via dotnet CLI)
-- Build command(s): 
+- Build command(s):
   - `dotnet restore` — Restore dependencies
   - `dotnet build` — Build the project
   - `dotnet build --configuration Release` — Release build

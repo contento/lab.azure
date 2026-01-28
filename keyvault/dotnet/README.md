@@ -52,13 +52,32 @@ az keyvault secret set --vault-name your-keyvault-name --name rosina-password-de
 
 ### 3. Configure Application
 
-Update `appsettings.json` with your Key Vault URL:
-```json
-{
-  "KeyVault": {
-    "VaultUrl": "https://your-keyvault-name.vault.azure.net/"
-  }
-}
+**Option A: Azure Key Vault Mode**
+
+Copy the example configuration and update with your Key Vault URL:
+```bash
+cp appsettings.example.json appsettings.json
+# Edit appsettings.json with your Key Vault URL
+```
+
+Or use environment variables:
+```bash
+export KeyVault__VaultUrl="https://your-keyvault-name.vault.azure.net/"
+```
+
+**Option B: Local Development Mode**
+
+For local testing without Azure:
+```bash
+export USE_LOCAL=true
+export LOCAL_USERNAME="alice"
+export LOCAL_PASSWORD="opensesame"
+```
+
+Or copy and edit the `.env.example` file:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
 ### 4. Grant Access Permissions
