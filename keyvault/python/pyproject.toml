@@ -8,6 +8,3 @@ dependencies = [
     "azure-keyvault-secrets>=4.8.0,<=4.10.0",
 ]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
