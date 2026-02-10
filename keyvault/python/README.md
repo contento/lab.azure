@@ -12,21 +12,14 @@ Quick steps
   # Edit .env with your configuration
   ```
 
-- Install runtime deps (optional, for real Azure use):
-
-  **Using pip:**
-  ```bash
-  python -m pip install -r requirements.txt
-  ```
-
-  **Using UV (faster alternative):**
-  ```bash
-  uv pip install -r requirements.txt
-  ```
-
-  Or install UV first if you don't have it:
+- Install UV if you don't have it:
   ```bash
   curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+
+- Install runtime deps (optional, for real Azure use):
+  ```bash
+  uv sync
   ```
 
 - Run locally using environment variables (no Azure):

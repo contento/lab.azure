@@ -30,7 +30,7 @@ What to document here (agents should write or update these fields):
 
 - Primary language: **Python 3.x**
 - Package manager: **UV** (fast Python package installer)
-- Build command(s): `uv pip install -r requirements.txt`
+- Build command(s): `uv sync`
 - Test command(s): `uv run python -m unittest discover -v`
 - Dev/run command(s):
   - Local testing: `export USE_AZURE=false && export TEST_USERNAME=alice && export TEST_PASSWORD=opensesame && uv run app.py --show`
@@ -75,8 +75,6 @@ or Azure authentication for accessing secrets.
 Next steps for a human maintainer:
 
 - ✅ README.md exists with language, build, test, and run commands.
-- ✅ Project info has been populated above.
-- Consider adding `.env.example` with template environment variables.
 
 ---
-Generated: please review and tailor to this project.
+"Always detect the language of the current file. If it's .ps1, use modern PowerShell 7+ syntax. If it's .sh, assume Zsh/Bash. For .ipynb, provide concise code blocks suitable for cells.".
