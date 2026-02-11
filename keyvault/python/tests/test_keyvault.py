@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from keyvault import LocalSecretStore
+from secret_stores import LocalSecretStore
 
 
 class TestLocalSecretStore(unittest.TestCase):

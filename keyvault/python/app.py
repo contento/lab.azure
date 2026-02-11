@@ -1,7 +1,7 @@
 import argparse
 import os
 import sys
-from keyvault import make_secret_store_from_env
+from secret_stores import make_secret_store_from_env
 
 
 def mask_secret(s: str) -> str:
