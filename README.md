@@ -1,5 +1,14 @@
 # Azure Lab
 
+```text
+  o  o
+\______/
+  |
+     |    https://conten.to
+--------
+```
+
+
 This repository contains examples and demonstrations for working with Azure services.
 
 ## 🏗️ Architecture
