@@ -2,7 +2,12 @@ import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
 
 const containerName = process.env.SESSIONS_CONTAINER_NAME ?? "sessions";
+const sessionIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let containerClient;
+
+export function isValidSessionId(sessionId) {
+  return typeof sessionId === "string" && sessionIdPattern.test(sessionId);
+}
 
 function getContainerClient() {
   if (!containerClient) {
@@ -48,22 +53,23 @@ export async function createSession(session) {
   return session;
 }
 
+async function downloadSessionsByPrefix(client, prefix) {
+  const blobNames = [];
+  for await (const blob of client.listBlobsFlat({ prefix })) {
+    blobNames.push(blob.name);
+  }
+  const sessions = await Promise.all(blobNames.map((name) => downloadSession(client, name)));
+  return sessions.sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+}
+
 export async function listSessions(ownerId) {
   const client = getContainerClient();
-  const sessions = [];
-  for await (const blob of client.listBlobsFlat({ prefix: `sessions/${encodeURIComponent(ownerId)}/` })) {
-    sessions.push(await downloadSession(client, blob.name));
-  }
-  return sessions.sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+  return downloadSessionsByPrefix(client, `sessions/${encodeURIComponent(ownerId)}/`);
 }
 
 export async function listAllSessions() {
   const client = getContainerClient();
-  const sessions = [];
-  for await (const blob of client.listBlobsFlat({ prefix: "sessions/" })) {
-    sessions.push(await downloadSession(client, blob.name));
-  }
-  return sessions.sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+  return downloadSessionsByPrefix(client, "sessions/");
 }
 
 export async function getSession(ownerId, sessionId) {

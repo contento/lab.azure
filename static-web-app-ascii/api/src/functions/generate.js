@@ -1,6 +1,6 @@
 import { app } from "@azure/functions";
 import { randomUUID } from "node:crypto";
-import { renderAsciiArt, validateGenerationRequest } from "../services/ascii-renderer.js";
+import { renderAsciiArt, validateGenerationRequest, ValidationError } from "../services/ascii-renderer.js";
 import { requirePrincipal } from "../services/authorization.js";
 import { createSession } from "../services/session-store.js";
 
@@ -23,7 +23,13 @@ app.http("generate", {
       await createSession(session);
       return { status: 201, jsonBody: session };
     } catch (error) {
-      return { status: error.message === "Authentication is required." ? 401 : 400, jsonBody: { error: error.message } };
+      if (error.message === "Authentication is required.") {
+        return { status: 401, jsonBody: { error: error.message } };
+      }
+      if (error instanceof ValidationError) {
+        return { status: 400, jsonBody: { error: error.message } };
+      }
+      return { status: 500, jsonBody: { error: "The request could not be completed." } };
     }
   }
 });

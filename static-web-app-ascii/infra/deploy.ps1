@@ -44,6 +44,10 @@ if (-not $appId) {
     $appId = (& az ad app create --display-name $appDisplayName --sign-in-audience AzureADMyOrg --web-redirect-uris "https://$hostname/.auth/login/aad/callback" --query appId --output tsv).Trim()
 } else {
     Invoke-Az @("ad", "app", "update", "--id", $appId, "--web-redirect-uris", "https://$hostname/.auth/login/aad/callback")
+    $existingKeyIds = (& az ad app credential list --id $appId --query "[].keyId" --output tsv)
+    foreach ($keyId in $existingKeyIds) {
+        if ($keyId) { Invoke-Az @("ad", "app", "credential", "delete", "--id", $appId, "--key-id", $keyId) }
+    }
 }
 Invoke-Az @("ad", "app", "update", "--id", $appId, "--set", "groupMembershipClaims=SecurityGroup")
 $clientSecret = (& az ad app credential reset --id $appId --append --display-name "static-web-app" --query password --output tsv).Trim()

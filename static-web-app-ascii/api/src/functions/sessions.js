@@ -1,6 +1,6 @@
 import { app } from "@azure/functions";
 import { isSessionOwner, requirePrincipal } from "../services/authorization.js";
-import { deleteSession, getSession, listSessions } from "../services/session-store.js";
+import { deleteSession, getSession, isValidSessionId, listSessions } from "../services/session-store.js";
 
 app.http("sessions", {
   methods: ["GET"],
@@ -23,6 +23,9 @@ app.http("deleteSession", {
   handler: async (request, context) => {
     try {
       const principal = requirePrincipal(request);
+      if (!isValidSessionId(request.params.sessionId)) {
+        return { status: 404, jsonBody: { error: "Session not found." } };
+      }
       const session = await getSession(principal.objectId, request.params.sessionId);
       if (!session || !isSessionOwner(session, principal)) {
         return { status: 404, jsonBody: { error: "Session not found." } };
