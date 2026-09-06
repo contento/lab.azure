@@ -1,0 +1,20 @@
+{
+  "routes": [
+    { "route": "/admin/*", "allowedRoles": ["admin"] },
+    { "route": "/api/admin/*", "allowedRoles": ["admin"] },
+    { "route": "/*", "allowedRoles": ["authenticated"] }
+  ],
+  "auth": {
+    "rolesSource": "/api/GetRoles",
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/__TENANT_ID__/v2.0",
+          "clientIdSettingName": "AZURE_CLIENT_ID",
+          "clientSecretSettingName": "AZURE_CLIENT_SECRET"
+        },
+        "login": { "loginParameters": ["scope=openid profile email"] }
+      }
+    }
+  }
+}

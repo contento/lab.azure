@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "STORAGE_ACCOUNT_NAME": "replace-with-storage-account-name",
+    "SESSIONS_CONTAINER_NAME": "sessions",
+    "ADMIN_GROUP_ID": "replace-with-admin-group-object-id",
+    "USER_GROUP_ID": "replace-with-user-group-object-id"
+  }
+}

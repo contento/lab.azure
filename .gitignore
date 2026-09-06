@@ -42,6 +42,8 @@ appsettings.*.json
 
 # Azure
 local.settings.json
+local.settings.*.json
+!local.settings.example.json
 *.pubxml
 
 # Environment variables
