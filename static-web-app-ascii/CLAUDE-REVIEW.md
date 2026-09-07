@@ -89,3 +89,61 @@ This line runs unconditionally on every `deploy.ps1` run, whether the app regist
 - Frontend renders all user-controlled text via `textContent` (never `innerHTML`), so there's no stored/reflected XSS path for session text or art despite storing user-supplied strings.
 - Test coverage in `api/test/services.test.js` hits the right seams: validation, principal parsing, role mapping, and ownership — matching the "cover authentication, authorization, input validation, ownership" convention in `AGENTS.md`.
 - `staticwebapp.config.json`'s tenant-placeholder swap-and-restore in `deploy.ps1` is handled with a `try/finally`, so a failed deploy won't leave `__TENANT_ID__` permanently replaced in source control.
+
+---
+
+## Second pass — 2026-09-07
+
+Two commits landed since the first pass, both after `before-claude-changes`:
+
+- `92b5a5b` — added [`DEEPSEEK-REVIEW.md`](../DEEPSEEK-REVIEW.md) (repo root), an independent review pass by a different model. It confirms all five findings above are correctly applied and adds its own findings (S1-S2, T1-T5, F1-F3, I1-I4) — mostly error-classification robustness (string-matching exception messages instead of typed errors, a couple of 500s that should be 400s, raw `error.message` echoed to the client on unexpected failures) and low/info-grade polish. None of it is a live security hole; I largely agree with its assessment and it's worth working through as a follow-up (see recommendation below), but it doesn't change anything applied in the first pass.
+- `6e89bc6` — added a filesystem-backed local development mode (`SESSION_STORE=filesystem`, `LOCAL_DEVELOPMENT=true`) so `npx swa start` works without Entra or Azure Storage. This is new code, not covered by either prior review, and introduces one finding worth fixing before relying on it further.
+- `849e1e9` — landed after this second pass started (`feat: add local and deployment helpers`): adds root-level `start-local.sh`/`.ps1` and `deploy.sh`/`.ps1` wrappers, and renames the admin endpoint from `/api/admin/sessions` to `/api/sessions/admin`. Checked the rename for consistency — `admin-sessions.js`'s route, `staticwebapp.config.json`'s route rule, and `app.js`'s fetch call were all updated together, so it's a deliberate, correctly-applied rename, not a regression. It also extends `resolveRoles()` with the same `isLocalDevelopment()` short-circuit already in `getPrincipal()` — one more reason finding 6 below is worth closing: the local-dev bypass now controls both identity *and* role resolution.
+
+**Checkpoint before this pass:** tagged `before-claude-second-review`.
+
+### 6. High — `LOCAL_DEVELOPMENT=true` is an unauthenticated-admin backdoor if it ever reaches a real deployment
+
+[api/src/services/authorization.js:5-30](api/src/services/authorization.js#L5-L30):
+
+```js
+function isLocalDevelopment() {
+  return process.env.LOCAL_DEVELOPMENT === "true";
+}
+
+function localPrincipal() {
+  const roles = (process.env.LOCAL_USER_ROLES ?? "authenticated,user,admin")...
+  return { objectId: process.env.LOCAL_USER_ID ?? "local-developer", roles, groups: [] };
+}
+
+export function getPrincipal(request) {
+  const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+  if (!clientPrincipalHeader) {
+    return isLocalDevelopment() ? localPrincipal() : null;
+  }
+  ...
+```
+
+`getPrincipal` is the single source of identity for every API handler (`generate`, `sessions`, `admin-sessions`, `GetRoles`). The only thing standing between "unauthenticated request" and "fully-privileged admin" is one environment variable, and `local.settings.example.json` — the file `README.md` tells developers to copy — ships it as `LOCAL_DEVELOPMENT=true` with `LOCAL_USER_ROLES=authenticated,user,admin` by default. There is nothing in the code that checks whether it's actually running locally (e.g. absence of `WEBSITE_SITE_NAME`/`FUNCTIONS_EXTENSION_VERSION`, which Azure sets and a local `func`/`swa` host does not). If this flag is ever set in the deployed Static Web App's application settings — copy-pasted from the local file, carried over by a CI script, or set by mistake during troubleshooting — every request without an `x-ms-client-principal` header (i.e. every anonymous request, since the header only exists once SWA's own auth has run) is treated as a fully-privileged local-developer admin. That's a complete authentication bypass, not a degraded-security edge case.
+
+`deploy.ps1`'s `appsettings set` call doesn't set this variable today, so a `deploy.ps1` run won't introduce it — but nothing actively prevents or clears it either, and the blast radius (full admin, no auth) is high enough that "the deploy script happens not to set it" isn't a comfortable safety margin on its own.
+
+**Fix:** make the local-dev fallback self-disabling in a real Azure environment, not just absent from the deploy script — e.g. `isLocalDevelopment() { return process.env.LOCAL_DEVELOPMENT === "true" && !process.env.WEBSITE_SITE_NAME; }` (Azure Functions/App Service always sets `WEBSITE_SITE_NAME`; a local `func start`/`swa start` host never does). Add a test asserting the fallback is refused when that indicator is present, and add a line to `README.md`/`AGENTS.md` warning never to copy `LOCAL_DEVELOPMENT`/`LOCAL_USER_ROLES` into deployed app settings.
+
+### 7. Medium — filesystem session store has no defense-in-depth against a malicious `sessionId`
+
+[api/src/services/session-store.js:19-21](api/src/services/session-store.js#L19-L21):
+
+```js
+function sessionFilePath(ownerId, sessionId) {
+  return path.join(sessionDirectory(), encodeURIComponent(ownerId), `${sessionId}.json`);
+}
+```
+
+Unlike Blob Storage (a flat namespace where `../` in a blob name is just a literal character, as noted in finding 3), `path.join` on a real filesystem *does* resolve `..` segments. `ownerId` is encoded but `sessionId` is not. Today this is safe only because the one caller that passes a route-supplied `sessionId` — `deleteSession` in [api/src/functions/sessions.js:22-31](api/src/functions/sessions.js#L26-L28) — already rejects non-UUID input via the `isValidSessionId` check added in finding 3. In other words, the fix from the first pass happens to also be the only thing preventing local-filesystem path traversal (arbitrary file read via `getSession`, arbitrary file delete via `deleteSession`) now that a real filesystem backend exists. That's a fragile arrangement: the store itself trusts its caller completely, so any future code path that reaches `getSession`/`deleteSession` with unvalidated input (a new endpoint, a refactor that moves the check, a different caller in a test or script) reopens it with no second line of defense.
+
+**Fix:** validate `sessionId` inside `session-store.js` itself (reuse `isValidSessionId`, e.g. in `sessionFilePath`, throwing or returning `null` on a bad ID) so the store is safe independent of what handlers do upstream. Cheap, and consistent with the module already being the sole place storage concerns live per `AGENTS.md`.
+
+### Recommendation
+
+Yes, worth re-executing — finding 6 is a real (if currently dormant) authentication-bypass risk and finding 7 is a cheap hardening pass on code introduced since the last apply. Both are small, contained changes. `DEEPSEEK-REVIEW.md`'s T1/T2/T3 (typed auth errors, JSON-parse error mapping, no raw `error.message` to the client) are good follow-ups in the same spirit as this pass's finding 2 and would be reasonable to fold in at the same time, but aren't urgent — the rest of that review (F1-F3, I1-I4, S2) is polish appropriate to leave for later.
