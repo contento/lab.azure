@@ -35,6 +35,8 @@ pwsh ./deploy-code.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Locatio
 ./deploy-code.sh [base-name] [environment] [location] [location-code] [subscription-id]
 pwsh ./infra/deploy-infrastructure.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
 ./infra/deploy-infrastructure.sh [base-name] [environment] [location] [location-code] [subscription-id]
+pwsh ./add-user.ps1 [-User <email-or-upn>] [-Role admin|user] [-BaseName <name>] [-Environment dev|test|prod] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
+./add-user.sh [user-email-or-upn] [admin|user] [base-name] [environment] [location-code] [subscription-id]
 ```
 
 ## Conventions

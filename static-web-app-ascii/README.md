@@ -62,7 +62,20 @@ Provision or update Azure Resource Groups, Storage accounts, Static Web Apps, En
 pwsh ./infra/deploy-infrastructure.ps1
 ```
 
-Add people to the reported `*-Admins` or `*-Users` group using your tenant's approved membership process. Group changes can require a fresh sign-in before new claims are visible.
+`infra/deploy-infrastructure.ps1` automatically adds the active Azure CLI user to the environment's `*-admins` and `*-users` security groups.
+
+### 3. Add users to application roles
+To assign `admin` or `user` roles to yourself or another user by email/UPN:
+
+```bash
+./add-user.sh [user-email-or-upn] [admin|user]
+```
+
+```powershell
+pwsh ./add-user.ps1 [-User <email-or-upn>] [-Role admin|user]
+```
+
+Omit the user parameter to assign the currently active Azure CLI user. Group changes require signing out and in again on the app before new claims are reflected.
 
 ## Validate infrastructure
 

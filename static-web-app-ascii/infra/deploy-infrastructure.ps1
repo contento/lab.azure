@@ -35,6 +35,13 @@ function Get-OrCreateGroup([string] $DisplayName) {
     return $groupId.Trim()
 }
 
+function Add-GroupMember([string] $GroupId, [string] $MemberId) {
+    $isMember = (& az ad group member check --group $GroupId --member-id $MemberId --query value --output tsv 2>$null)
+    if ($isMember -ne "true") {
+        Invoke-Az @("ad", "group", "member", "add", "--group", $GroupId, "--member-id", $MemberId)
+    }
+}
+
 Write-Host "==> [1/7] Resolving active Azure subscription..." -ForegroundColor Cyan
 if ($SubscriptionId) { Invoke-Az @("account", "set", "--subscription", $SubscriptionId) }
 Invoke-Az @("account", "show", "--output", "none")
@@ -69,7 +76,15 @@ Write-Host "    Static Web App Hostname: https://$hostname" -ForegroundColor Gra
 Write-Host "==> [4/7] Ensuring Entra ID security groups..." -ForegroundColor Cyan
 $adminGroupId = Get-OrCreateGroup $adminGroupName
 $userGroupId = Get-OrCreateGroup $userGroupName
-
+$signedInUserRaw = (& az ad signed-in-user show --query '{id:id, upn:userPrincipalName}' --output json 2>$null)
+if ($signedInUserRaw) {
+    $signedInUser = $signedInUserRaw | ConvertFrom-Json
+    if ($signedInUser -and $signedInUser.id) {
+        Write-Host "    Adding current active user '$($signedInUser.upn)' to groups..." -ForegroundColor Gray
+        Add-GroupMember -GroupId $adminGroupId -MemberId $signedInUser.id
+        Add-GroupMember -GroupId $userGroupId -MemberId $signedInUser.id
+    }
+}
 Write-Host "==> [5/7] Configuring Entra app registration '$staticWebAppName-auth'..." -ForegroundColor Cyan
 $appDisplayName = "$staticWebAppName-auth"
 $appIdRaw = (& az ad app list --display-name $appDisplayName --query '[0].appId' --output tsv 2>$null)
