@@ -1,0 +1,19 @@
+{
+  "name": "typecast-separated-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20 <25"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test",
+    "lint": "node --check src/server.js && node --check src/services/ascii-renderer.js && node --check src/services/session-store.js"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.10.1",
+    "@azure/storage-blob": "^12.29.1",
+    "figlet": "^1.8.1"
+  }
+}
