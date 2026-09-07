@@ -115,6 +115,8 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
   name: 'stapp-${namePrefix}-${uniqueSuffix}'
   location: location
   sku: { name: 'Standard', tier: 'Standard' }
+  // ARM preflight validation requires an explicit (even empty) properties object for this API version.
+  properties: {}
 }
 
 output endpoints object = {
