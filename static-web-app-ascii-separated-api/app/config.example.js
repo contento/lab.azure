@@ -1,1 +1,1 @@
-window.TYPECAST_API_BASE_URL = "http://localhost:7071";
+window.TYPECAST_API_BASE_URL = "http://127.0.0.1:7072";

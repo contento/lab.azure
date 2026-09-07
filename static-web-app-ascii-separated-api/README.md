@@ -12,7 +12,7 @@ Typecast is a static Azure Static Web App with an independently deployed Node.js
 pwsh ./start-local.ps1
 ```
 
-The scripts start the Node API on `http://localhost:7071` and use Static Web Apps CLI to serve the client at `http://localhost:4280`. Set `SWA_PORT` to run a second instance, for example `SWA_PORT=4281 ./start-local.sh` or `$env:SWA_PORT=4281; pwsh ./start-local.ps1`. Sessions are JSON files under `api/.sessions/`. Local runs use no Entra ID or Azure Storage.
+The scripts start the Node API on `http://127.0.0.1:7072` and use Static Web Apps CLI to serve the client at `http://localhost:4281`, avoiding the original sample's `7071` and `4280` defaults. Set `API_PORT` and `SWA_PORT` to override them, for example `API_PORT=7082 SWA_PORT=4282 ./start-local.sh` or `$env:API_PORT=7082; $env:SWA_PORT=4282; pwsh ./start-local.ps1`. Sessions are JSON files under `api/.sessions/`. Local runs use no Entra ID or Azure Storage.
 
 ## Deploy
 
