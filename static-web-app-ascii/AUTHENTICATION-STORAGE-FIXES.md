@@ -108,7 +108,6 @@ The public frontend should remain public. Protect API routes with the authentica
 ```json
 {
   "routes": [
-    { "route": "/api/sessions/admin", "allowedRoles": ["admin"] },
     { "route": "/api/*", "allowedRoles": ["authenticated"] }
   ],
   "auth": {
@@ -126,6 +125,8 @@ The public frontend should remain public. Protect API routes with the authentica
 ```
 
 Do not add a `rolesSource` callback unless its lifecycle and platform routing are specifically tested. Resolve application roles in an authenticated API instead.
+
+If administrator access is based on Entra security-group claims, enforce the administrator check in the API after parsing `x-ms-client-principal`. A Static Web Apps route such as `allowedRoles: ["admin"]` only works when the platform has actually populated an `admin` role, for example through a working role source or manual role assignment. Removing `rolesSource` without moving this check into the API leaves the route rule ineffective for dynamic group-based administrators.
 
 The frontend should fetch roles after authentication:
 
@@ -231,3 +232,27 @@ Common useful error codes include:
 - `700054`: enable ID-token issuance.
 - `401` from the Static Web Apps callback after successful Entra sign-in: inspect the app registration, redirect URI, client secret, and stale callback transaction.
 - `CredentialUnavailableError`: verify whether the API runtime exposes managed identity; if it does not, configure a supported environment/workload credential and grant it Blob Data Contributor.
+
+## Applicability to a Separate Container Apps API
+
+These fixes apply directly only when the API is hosted by the Static Web Apps Functions runtime. They should not be copied unchanged into an app with a separately deployed Azure Container Apps API:
+
+- Static Web Apps callback and `rolesSource` settings belong to the frontend authentication boundary. A separate API must validate the Static Web Apps client principal or another bearer token explicitly; Container Apps does not receive that trust automatically.
+- The Static Web Apps managed-identity limitation is specific to the managed API integration. A Container App should use its own managed identity or another dedicated workload identity for Blob Storage, with `Storage Blob Data Contributor` scoped to the storage account or container.
+- Filesystem sessions in a Container App are ephemeral and may differ between replicas. Use durable Blob Storage before describing sessions as private, persistent, or production-ready.
+
+The correct sequence for the separate API is therefore: establish API authentication, validate the caller server-side, provision a Container Apps workload identity, grant it the minimum Blob role, and replace filesystem persistence with durable storage. The fixes in this guide are useful diagnostics, but they do not complete that architecture by themselves.
+
+## Reviewer Notes (Claude)
+
+These are my notes from reviewing this document, not part of the original guide.
+
+- All three root causes match documented, known Azure behavior: the `700054` implicit-grant requirement for SWA's hybrid `code+id_token` callback, the `rolesSource`-called-during-login circular dependency, and managed SWA Functions APIs not reliably exposing an identity endpoint to `DefaultAzureCredential`. The recommended fixes are the standard workarounds for each.
+- The sample route config under "Keep Static Web Apps routes simple" was initially inconsistent with the "do not use `rolesSource`" advice a few lines above it:
+
+  ```json
+  { "route": "/api/sessions/admin", "allowedRoles": ["admin"] }
+  ```
+
+  This was resolved by removing the `admin` route rule from the example and documenting that group-based administrator checks belong in the API handler, where the API can read trusted groups from `x-ms-client-principal`.
+- The storage section is upfront that reusing the Entra auth app's client secret for Blob access increases blast radius (a leaked secret now grants both sign-in impersonation and storage access) and correctly names the better long-term fix (separate workload identity or a linked Function App with managed identity). Worth keeping that caveat prominent if this pattern is copied into another app, rather than treating it as the default architecture.
