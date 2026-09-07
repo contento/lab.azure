@@ -1,20 +1,33 @@
+@description('Lowercase application base name used for resource names.')
+@minLength(2)
+@maxLength(10)
+param baseName string
+
+@description('Deployment environment used for resource names.')
+@allowed([
+  'dev'
+  'test'
+  'prod'
+])
+param environment string
+
 @description('Azure region for the resources.')
 param location string = resourceGroup().location
 
-@description('Lowercase application, environment, and region prefix used for resource names.')
-param namePrefix string
+@description('Lowercase region code used for resource names.')
+@minLength(2)
+@maxLength(4)
+param locationCode string
 
-@description('Lowercase application and environment prefix used in Storage account names.')
-@minLength(5)
-param compactName string
-
-@description('Subscription-derived suffix used for globally unique resource names.')
-@minLength(8)
-param uniqueSuffix string
+@description('Subscription ID used to derive globally unique resource-name suffixes.')
+param subscriptionId string
 
 @description('Tags applied to deployed resources.')
 param tags object = {}
 
+var uniqueSuffix = substring(replace(subscriptionId, '-', ''), 0, 8)
+var namePrefix = '${baseName}-${environment}-${locationCode}'
+var compactName = '${baseName}${environment}'
 var sessionsContainerName = 'sessions'
 var storageBlobDataContributorRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
 var storageAccountName = 'st${compactName}${uniqueSuffix}'

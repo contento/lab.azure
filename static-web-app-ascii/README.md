@@ -38,17 +38,17 @@ Production continues to require a Static Web Apps Entra principal and uses manag
 
 ## Deploy
 
-Choose one lowercase alphanumeric base name, then run one of the root-level deployment helpers. Each invocation provisions or updates the Azure resources, configures the Entra integration, and publishes both `app/` and `api/`.
+The checked-in `infra/parameters.dev.bicepparam` supplies the default base name (`typecast`), environment (`dev`), location (`eastus2`), region code (`eus2`), and active development subscription. Copy `infra/parameters.template.bicepparam` for a future subscription or environment. Run either root-level deployment helper with no arguments to provision or update Azure resources, configure Entra integration, and publish both `app/` and `api/`.
 
 ```bash
-./deploy.sh typecast
+./deploy.sh
 ```
 
 ```powershell
-pwsh ./deploy.ps1 -BaseName typecast
+pwsh ./deploy.ps1
 ```
 
-The default deployment names are `rg-typecast-dev-eus`, `stapp-typecast-dev-eus-<subscription-suffix>`, `sttypecastdev<subscription-suffix>`, `grp-typecast-dev-eus-admins`, `grp-typecast-dev-eus-users`, and `app-typecast-dev-eus-swa`. Use optional environment, Azure region, region code, and subscription ID arguments to override the defaults. The script provisions the Standard Static Web App, Storage account, sessions container, and Blob RBAC assignment from `infra/main.bicep`. It then creates or reuses two Entra security groups, configures a single-tenant app registration with group claims, sets the required Static Web App application settings, and deploys `app/` plus `api/` using a deployment token held only in process memory.
+The default deployment names are `rg-typecast-dev-eus2`, `stapp-typecast-dev-eus2-<subscription-suffix>`, `sttypecastdev<subscription-suffix>`, `grp-typecast-dev-eus2-admins`, `grp-typecast-dev-eus2-users`, and `app-typecast-dev-eus2-swa`. Both helpers accept optional positional shell arguments or PowerShell parameters to override the base name, environment, Azure region, region code, and subscription ID. The script provisions the Standard Static Web App, Storage account, sessions container, and Blob RBAC assignment from `infra/main.bicep`. It then creates or reuses two Entra security groups, configures a single-tenant app registration with group claims, sets the required Static Web App application settings, and deploys `app/` plus `api/` using a deployment token held only in process memory.
 
 Add people to the reported `*-Admins` or `*-Users` group using your tenant's approved membership process. Group changes can require a fresh sign-in before new claims are visible.
 
