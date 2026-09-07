@@ -9,4 +9,4 @@ for command in az node npx pwsh; do
 done
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec pwsh -NoProfile -File "$script_dir/deploy.ps1" -ParametersFile "$script_dir/parameters.dev.bicepparam" "$@"
+exec pwsh -NoProfile -File "$script_dir/deploy-infrastructure.ps1" -ParametersFile "$script_dir/parameters.dev.bicepparam" "$@"

@@ -42,7 +42,7 @@ Build an Azure Static Web Apps application that converts user-entered text to AS
 
 1. Run `npm test` and `npm run lint` from `api/`.
 2. Compile `infra/main.bicep` with `az bicep build`.
-3. Parse `infra/deploy.ps1` with PowerShell 7+ and deploy to a non-production resource group.
+3. Parse `infra/deploy-infrastructure.ps1` with PowerShell 7+ and deploy to a non-production resource group.
 4. Add separate test accounts to the generated User and Admin groups, then sign in again to refresh role claims.
 5. Verify a User can generate, list, and delete only their own records.
 6. Verify an Admin can view cross-user history but receives no deletion control.

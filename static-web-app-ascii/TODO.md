@@ -3,7 +3,7 @@
 ## Deployment Verification
 
 - [ ] Install Azure CLI on the development machine and run `az bicep build --file ./infra/main.bicep`.
-- [ ] Deploy into a non-production Azure resource group with `pwsh ./infra/deploy.ps1`.
+- [ ] Deploy into a non-production Azure resource group with `pwsh ./infra/deploy-infrastructure.ps1`.
 - [ ] Confirm the Static Web App managed identity has `Storage Blob Data Contributor` on the created storage account.
 - [ ] Confirm the deployment-created Entra app registration includes the production Static Web Apps callback URL and security group claims.
 - [ ] Add one test account to the generated User group and one to the generated Admin group.

@@ -16,5 +16,5 @@ foreach ($command in "az", "node", "npx") {
     }
 }
 
-& (Join-Path $PSScriptRoot "infra/deploy.ps1") @PSBoundParameters
+& (Join-Path $PSScriptRoot "infra/deploy-infrastructure.ps1") @PSBoundParameters
 if ($LASTEXITCODE -ne 0) { throw "Deployment failed." }

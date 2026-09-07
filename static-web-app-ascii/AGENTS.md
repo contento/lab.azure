@@ -41,6 +41,6 @@ pwsh ./deploy.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Location <az
 - Keep globally unique resource names lowercase and append the subscription-derived suffix. Do not add hyphens to Storage account names.
 - Use ESM JavaScript and the Azure Functions v4 programming model.
 - Keep tests focused in `api/test/` and cover authentication, authorization, input validation, and ownership boundaries for server-side changes.
-- Use PowerShell 7+ syntax in `infra/deploy.ps1`.
+- Use PowerShell 7+ syntax in `infra/deploy-infrastructure.ps1`.
 - The checked-in `app/staticwebapp.config.json` intentionally contains `__TENANT_ID__`. `deploy.ps1` substitutes it only while publishing and restores the template afterward.
 - Preserve the concise, security-focused explanations in `README.md` when behavior or deployment requirements change.
