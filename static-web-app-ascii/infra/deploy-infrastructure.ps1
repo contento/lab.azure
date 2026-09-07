@@ -96,21 +96,9 @@ $clientSecret = if ($clientSecretRaw) { $clientSecretRaw.ToString().Trim() } els
 Write-Host "==> [6/7] Setting Static Web App application settings..." -ForegroundColor Cyan
 Invoke-Az @("staticwebapp", "appsettings", "set", "--name", $staticWebAppName, "--resource-group", $resourceGroupName, "--setting-names", "AZURE_CLIENT_ID=$appId", "AZURE_CLIENT_SECRET=$clientSecret", "ADMIN_GROUP_ID=$adminGroupId", "USER_GROUP_ID=$userGroupId", "STORAGE_ACCOUNT_NAME=$storageAccountName", "SESSIONS_CONTAINER_NAME=sessions", "--output", "none")
 
-Write-Host "==> [7/7] Publishing frontend and API via SWA CLI..." -ForegroundColor Cyan
-try {
-    Set-Content -Path $configPath -Value ($originalConfig.Replace("__TENANT_ID__", $tenantId)) -NoNewline
-    $deploymentTokenRaw = (& az staticwebapp secrets list --name $staticWebAppName --resource-group $resourceGroupName --query properties.apiKey --output tsv)
-    $deploymentToken = if ($deploymentTokenRaw) { $deploymentTokenRaw.ToString().Trim() } else { "" }
-    Push-Location $projectRoot
-    try {
-        npx --yes @azure/static-web-apps-cli deploy --app-location app --api-location api --deployment-token $deploymentToken
-    } finally {
-        Pop-Location
-    }
-} finally {
-    Set-Content -Path $configPath -Value $originalConfig -NoNewline
-}
+Write-Host "==> [7/7] Publishing frontend and API..." -ForegroundColor Cyan
+& (Join-Path $projectRoot "deploy-app.ps1") -BaseName $BaseName -Environment $Environment -Location $Location -LocationCode $LocationCode -SubscriptionId $activeSubscriptionId
 
-Write-Host "`n✔ Deployment complete: https://$hostname" -ForegroundColor Green
+Write-Host "`n✔ Infrastructure deployment complete: https://$hostname" -ForegroundColor Green
 Write-Host "  Resource group: $resourceGroupName" -ForegroundColor Green
 Write-Host "  Add people to '$adminGroupName' or '$userGroupName' through your Entra tenant's approved membership process." -ForegroundColor Green
