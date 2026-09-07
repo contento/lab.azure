@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidatePattern('^[a-z0-9]{2,10}$')] [string] $BaseName = "typecast",
+    [ValidatePattern('^[a-z0-9]{2,10}$')] [string] $BaseName = "asciitype",
     [ValidateSet("dev", "test", "prod")] [string] $Environment = "dev",
     [string] $Location = "eastus2",
     [ValidatePattern('^[a-z0-9]{2,4}$')] [string] $LocationCode = "eus2",

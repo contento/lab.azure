@@ -38,7 +38,7 @@ Production continues to require a Static Web Apps Entra principal and uses manag
 
 ## Deploy
 
-The checked-in `infra/parameters.dev.bicepparam` supplies the default base name (`typecast`), environment (`dev`), location (`eastus2`), region code (`eus2`), and active development subscription. Copy `infra/parameters.template.bicepparam` for a future subscription or environment.
+The checked-in `infra/parameters.dev.bicepparam` supplies the default base name (`asciitype`), environment (`dev`), location (`eastus2`), region code (`eus2`), and active development subscription. Copy `infra/parameters.template.bicepparam` for a future subscription or environment.
 
 ### 1. Code deployment (`app/` and `api/`)
 Deploy or update the frontend assets and Azure Functions API code to an existing Static Web App:

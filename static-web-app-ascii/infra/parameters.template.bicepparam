@@ -1,6 +1,6 @@
 using './main.bicep'
 
-param baseName = 'typecast'
+param baseName = 'asciitype'
 param environment = 'dev'
 param location = 'eastus2'
 param locationCode = 'eus2'
