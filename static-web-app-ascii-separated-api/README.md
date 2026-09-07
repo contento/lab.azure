@@ -41,3 +41,16 @@ pwsh ./infra/deploy-infrastructure.ps1
 ```
 
 The default deployment names are `rg-asciitype-dev-eus2`, `stapp-asciitype-dev-eus2-<subscription-suffix>`, `cae-asciitype-dev-eus2`, `ca-asciitype-dev-eus2-api`, `acrasciitypedev<subscription-suffix>`, and `log-asciitype-dev-eus2`. Both helpers accept optional positional shell arguments or PowerShell parameters to override the base name, environment, Azure region, region code, and subscription ID.
+
+### 3. Add users to application roles
+To assign `admin` or `user` roles to yourself or another user by email/UPN:
+
+```bash
+./add-user.sh [user-email-or-upn] [admin|user]
+```
+
+```powershell
+pwsh ./add-user.ps1 [-User <email-or-upn>] [-Role admin|user]
+```
+
+Omit the user parameter to assign the currently active Azure CLI user.
