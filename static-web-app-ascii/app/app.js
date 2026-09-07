@@ -75,7 +75,7 @@ async function initialize() {
   const isLocalHost = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
   if (!principal && !isLocalHost) return;
 
-  const roles = principal?.userRoles ?? (await request("/api/GetRoles")).roles;
+  const roles = (await request("/api/GetRoles")).roles;
 
   state.isAdmin = roles.some((role) => role.toLowerCase() === "admin");
   elements.signedOut.hidden = true;

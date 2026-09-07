@@ -49,7 +49,7 @@ try {
     Set-Content -Path $configPath -Value ($originalConfig.Replace("__TENANT_ID__", $tenantId)) -NoNewline
     Push-Location $projectRoot
     try {
-        npx --yes @azure/static-web-apps-cli deploy --app-location app --api-location api --deployment-token $deploymentToken --env production
+        npx --yes @azure/static-web-apps-cli deploy --app-location app --api-location api --api-language node --api-version 20 --deployment-token $deploymentToken --env production
     } finally {
         Pop-Location
     }

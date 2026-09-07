@@ -104,12 +104,20 @@ if (-not $appId) {
         }
     }
 }
-Invoke-Az @("ad", "app", "update", "--id", $appId, "--set", "groupMembershipClaims=SecurityGroup")
+Invoke-Az @("ad", "app", "update", "--id", $appId, "--set", "groupMembershipClaims=SecurityGroup", "--enable-id-token-issuance", "true")
+$servicePrincipalId = (& az ad sp list --filter "appId eq '$appId'" --query '[0].id' --output tsv 2>$null)
+if ($LASTEXITCODE -ne 0 -or -not $servicePrincipalId) {
+    Write-Host "    Creating enterprise application for '$appDisplayName'..." -ForegroundColor Gray
+    Invoke-Az @("ad", "sp", "create", "--id", $appId, "--output", "none")
+    $servicePrincipalId = (& az ad sp list --filter "appId eq '$appId'" --query '[0].id' --output tsv)
+}
+$storageAccountId = (& az storage account show --name $storageAccountName --resource-group $resourceGroupName --query id --output tsv)
+Invoke-Az @("role", "assignment", "create", "--assignee-object-id", $servicePrincipalId.Trim(), "--role", "Storage Blob Data Contributor", "--scope", $storageAccountId.Trim(), "--assignee-principal-type", "ServicePrincipal", "--output", "none")
 $clientSecretRaw = (& az ad app credential reset --id $appId --append --display-name "static-web-app" --query password --output tsv)
 $clientSecret = if ($clientSecretRaw) { $clientSecretRaw.ToString().Trim() } else { "" }
 
 Write-Host "==> [6/6] Setting Static Web App application settings..." -ForegroundColor Cyan
-Invoke-Az @("staticwebapp", "appsettings", "set", "--name", $staticWebAppName, "--resource-group", $resourceGroupName, "--setting-names", "AZURE_CLIENT_ID=$appId", "AZURE_CLIENT_SECRET=$clientSecret", "ADMIN_GROUP_ID=$adminGroupId", "USER_GROUP_ID=$userGroupId", "STORAGE_ACCOUNT_NAME=$storageAccountName", "SESSIONS_CONTAINER_NAME=sessions", "--output", "none")
+Invoke-Az @("staticwebapp", "appsettings", "set", "--name", $staticWebAppName, "--resource-group", $resourceGroupName, "--setting-names", "AZURE_CLIENT_ID=$appId", "AZURE_CLIENT_SECRET=$clientSecret", "AZURE_TENANT_ID=$tenantId", "ADMIN_GROUP_ID=$adminGroupId", "USER_GROUP_ID=$userGroupId", "STORAGE_ACCOUNT_NAME=$storageAccountName", "SESSIONS_CONTAINER_NAME=sessions", "--output", "none")
 
 Write-Host "`n✔ Infrastructure deployment complete: https://$hostname" -ForegroundColor Green
 Write-Host "  Resource group: $resourceGroupName" -ForegroundColor Green

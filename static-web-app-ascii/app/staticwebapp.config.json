@@ -4,7 +4,6 @@
     { "route": "/api/*", "allowedRoles": ["authenticated"] }
   ],
   "auth": {
-    "rolesSource": "/api/GetRoles",
     "identityProviders": {
       "azureActiveDirectory": {
         "registration": {
@@ -12,7 +11,7 @@
           "clientIdSettingName": "AZURE_CLIENT_ID",
           "clientSecretSettingName": "AZURE_CLIENT_SECRET"
         },
-        "login": { "loginParameters": ["scope=openid profile email"] }
+        "login": { "loginParameters": ["scope=openid profile email", "prompt=login"] }
       }
     }
   }
