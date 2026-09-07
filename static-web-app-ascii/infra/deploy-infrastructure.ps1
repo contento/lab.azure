@@ -93,11 +93,8 @@ Invoke-Az @("ad", "app", "update", "--id", $appId, "--set", "groupMembershipClai
 $clientSecretRaw = (& az ad app credential reset --id $appId --append --display-name "static-web-app" --query password --output tsv)
 $clientSecret = if ($clientSecretRaw) { $clientSecretRaw.ToString().Trim() } else { "" }
 
-Write-Host "==> [6/7] Setting Static Web App application settings..." -ForegroundColor Cyan
+Write-Host "==> [6/6] Setting Static Web App application settings..." -ForegroundColor Cyan
 Invoke-Az @("staticwebapp", "appsettings", "set", "--name", $staticWebAppName, "--resource-group", $resourceGroupName, "--setting-names", "AZURE_CLIENT_ID=$appId", "AZURE_CLIENT_SECRET=$clientSecret", "ADMIN_GROUP_ID=$adminGroupId", "USER_GROUP_ID=$userGroupId", "STORAGE_ACCOUNT_NAME=$storageAccountName", "SESSIONS_CONTAINER_NAME=sessions", "--output", "none")
-
-Write-Host "==> [7/7] Publishing frontend and API..." -ForegroundColor Cyan
-& (Join-Path $projectRoot "deploy-app.ps1") -BaseName $BaseName -Environment $Environment -Location $Location -LocationCode $LocationCode -SubscriptionId $activeSubscriptionId
 
 Write-Host "`n✔ Infrastructure deployment complete: https://$hostname" -ForegroundColor Green
 Write-Host "  Resource group: $resourceGroupName" -ForegroundColor Green

@@ -40,8 +40,8 @@ Production continues to require a Static Web Apps Entra principal and uses manag
 
 The checked-in `infra/parameters.dev.bicepparam` supplies the default base name (`typecast`), environment (`dev`), location (`eastus2`), region code (`eus2`), and active development subscription. Copy `infra/parameters.template.bicepparam` for a future subscription or environment.
 
-### 1. Deploy application code (`app/` and `api/`)
-Deploy or update the frontend assets and Azure Functions API code to an existing Static Web App:
+### 1. Full application deployment (Infrastructure + Identity + Code)
+Provisions or updates Azure resources and Entra ID configuration, then deploys application code:
 
 ```bash
 ./deploy-app.sh
@@ -51,8 +51,19 @@ Deploy or update the frontend assets and Azure Functions API code to an existing
 pwsh ./deploy-app.ps1
 ```
 
-### 2. Deploy Azure infrastructure & Entra configuration
-Provision or update Azure Resource Groups, Storage accounts, Static Web Apps, Entra ID groups, and app registrations:
+### 2. Code-only deployment (`app/` and `api/`)
+Quickly deploy or update frontend assets and Azure Functions API code to an existing Static Web App:
+
+```bash
+./deploy-code.sh
+```
+
+```powershell
+pwsh ./deploy-code.ps1
+```
+
+### 3. Infrastructure-only deployment
+Provision or update Azure Resource Groups, Storage accounts, Static Web Apps, Entra ID groups, and app registrations without publishing code:
 
 ```bash
 ./infra/deploy-infrastructure.sh
@@ -61,8 +72,6 @@ Provision or update Azure Resource Groups, Storage accounts, Static Web Apps, En
 ```powershell
 pwsh ./infra/deploy-infrastructure.ps1
 ```
-
-The default deployment names are `rg-typecast-dev-eus2`, `stapp-typecast-dev-eus2-<subscription-suffix>`, `sttypecastdev<subscription-suffix>`, `grp-typecast-dev-eus2-admins`, `grp-typecast-dev-eus2-users`, and `app-typecast-dev-eus2-swa`. Both helpers accept optional positional shell arguments or PowerShell parameters to override the base name, environment, Azure region, region code, and subscription ID. The infrastructure script provisions Bicep resources, Entra groups, app registrations, SWA app settings, and automatically triggers `./deploy-app.ps1`.
 
 Add people to the reported `*-Admins` or `*-Users` group using your tenant's approved membership process. Group changes can require a fresh sign-in before new claims are visible.
 

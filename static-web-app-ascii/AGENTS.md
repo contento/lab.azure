@@ -33,6 +33,8 @@ Run from the module root when Azure CLI is available:
 az bicep build --file ./infra/main.bicep
 pwsh ./deploy-app.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
 ./deploy-app.sh [base-name] [environment] [location] [location-code] [subscription-id]
+pwsh ./deploy-code.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
+./deploy-code.sh [base-name] [environment] [location] [location-code] [subscription-id]
 pwsh ./infra/deploy-infrastructure.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
 ./infra/deploy-infrastructure.sh [base-name] [environment] [location] [location-code] [subscription-id]
 ```
