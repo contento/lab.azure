@@ -27,10 +27,12 @@ cd api
 npm install
 npm test
 Copy-Item local.settings.example.json local.settings.json
-npx swa start ../app --api-location .
+npx --package @azure/static-web-apps-cli swa start ../app --api-location . --swa-config-location ../local
 ```
 
-Local authentication is not equivalent to Entra authentication in Azure. Use Static Web Apps CLI mock authentication for UI exploration, or deploy to a test environment to validate real group claims and managed-identity Blob access. A local Azure Storage emulator can be used only after adapting the storage service configuration; production code is intentionally configured for managed identity and Azure Blob endpoints.
+The checked-in local settings enable a fixed local developer identity and write session JSON to `api/.sessions/`; neither Microsoft Entra ID nor Azure Storage is used during this workflow. `local/staticwebapp.config.json` keeps API routes open for the local server only. Do not use it for deployment.
+
+Production continues to require a Static Web Apps Entra principal and uses managed-identity Blob access. Deploy to a test environment to validate real group claims and managed-identity behavior.
 
 ## Deploy
 

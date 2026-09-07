@@ -72,12 +72,15 @@ async function initialize() {
   const response = await fetch("/.auth/me");
   const data = response.ok ? await response.json() : [];
   const principal = data.clientPrincipal ?? data[0]?.clientPrincipal;
-  if (!principal) return;
+  const isLocalHost = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+  if (!principal && !isLocalHost) return;
 
-  state.isAdmin = (principal.userRoles ?? []).some((role) => role.toLowerCase() === "admin");
+  const roles = principal?.userRoles ?? (await request("/api/GetRoles")).roles;
+
+  state.isAdmin = roles.some((role) => role.toLowerCase() === "admin");
   elements.signedOut.hidden = true;
   elements.workspace.hidden = false;
-  elements.accountName.textContent = principal.userDetails;
+  elements.accountName.textContent = principal?.userDetails ?? "Local developer";
   elements.accountName.hidden = false;
   elements.signIn.hidden = true;
   elements.signOut.hidden = false;

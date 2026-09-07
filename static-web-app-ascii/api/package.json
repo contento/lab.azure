@@ -10,7 +10,7 @@
   "scripts": {
     "start": "func start",
     "test": "node --test",
-    "lint": "node --check src/services/ascii-renderer.js && node --check src/services/authorization.js"
+    "lint": "node --check src/services/ascii-renderer.js && node --check src/services/authorization.js && node --check src/services/session-store.js"
   },
   "dependencies": {
     "@azure/functions": "^4.9.0",

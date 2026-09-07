@@ -2,6 +2,23 @@ const objectIdentifierClaim = "http://schemas.microsoft.com/identity/claims/obje
 const roleClaim = "userRoles";
 const groupClaimTypes = new Set(["groups", "http://schemas.microsoft.com/ws/2008/06/identity/claims/groups"]);
 
+function isLocalDevelopment() {
+  return process.env.LOCAL_DEVELOPMENT === "true";
+}
+
+function localPrincipal() {
+  const roles = (process.env.LOCAL_USER_ROLES ?? "authenticated,user,admin")
+    .split(",")
+    .map((role) => role.trim())
+    .filter(Boolean);
+
+  return {
+    objectId: process.env.LOCAL_USER_ID ?? "local-developer",
+    roles,
+    groups: []
+  };
+}
+
 function claimValues(claims, type) {
   return claims.filter((claim) => claim.typ === type).map((claim) => claim.val);
 }
@@ -9,7 +26,7 @@ function claimValues(claims, type) {
 export function getPrincipal(request) {
   const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
   if (!clientPrincipalHeader) {
-    return null;
+    return isLocalDevelopment() ? localPrincipal() : null;
   }
 
   try {
