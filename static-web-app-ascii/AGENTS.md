@@ -31,11 +31,13 @@ Run from the module root when Azure CLI is available:
 
 ```text
 az bicep build --file ./infra/main.bicep
-pwsh ./infra/deploy.ps1 -ResourceGroupName <name> -StaticWebAppName <name> -StorageAccountName <name>
+pwsh ./deploy.ps1 -BaseName <name> [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
 ```
 
 ## Conventions
 
+- Use one lowercase alphanumeric base name, 2-10 characters, and derive all Azure resource and Entra display names from it. Default naming follows Microsoft resource abbreviations: `rg-<base>-<environment>-<region>`, `stapp-<base>-<environment>-<region>-<suffix>`, `st<base><environment><suffix>`, `grp-<base>-<environment>-<region>-admins`, `grp-<base>-<environment>-<region>-users`, and `app-<base>-<environment>-<region>-swa`.
+- Keep globally unique resource names lowercase and append the subscription-derived suffix. Do not add hyphens to Storage account names.
 - Use ESM JavaScript and the Azure Functions v4 programming model.
 - Keep tests focused in `api/test/` and cover authentication, authorization, input validation, and ownership boundaries for server-side changes.
 - Use PowerShell 7+ syntax in `infra/deploy.ps1`.

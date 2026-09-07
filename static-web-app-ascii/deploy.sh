@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if (( $# < 3 || $# > 6 )); then
-  printf 'Usage: %s <resource-group> <static-web-app-name> <storage-account-name> [location] [admin-group-name] [user-group-name]\n' "$0" >&2
+if (( $# < 1 || $# > 5 )); then
+  printf 'Usage: %s <base-name> [environment] [location] [location-code] [subscription-id]\n' "$0" >&2
   exit 1
 fi
 
@@ -15,13 +15,12 @@ done
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 arguments=(
-  -ResourceGroupName "$1"
-  -StaticWebAppName "$2"
-  -StorageAccountName "$3"
+  -BaseName "$1"
 )
 
-if (( $# >= 4 )); then arguments+=(-Location "$4"); fi
-if (( $# >= 5 )); then arguments+=(-AdminGroupName "$5"); fi
-if (( $# >= 6 )); then arguments+=(-UserGroupName "$6"); fi
+if (( $# >= 2 )); then arguments+=(-Environment "$2"); fi
+if (( $# >= 3 )); then arguments+=(-Location "$3"); fi
+if (( $# >= 4 )); then arguments+=(-LocationCode "$4"); fi
+if (( $# == 5 )); then arguments+=(-SubscriptionId "$5"); fi
 
 exec pwsh -NoProfile -File "$project_root/infra/deploy.ps1" "${arguments[@]}"

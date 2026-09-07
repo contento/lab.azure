@@ -1,11 +1,10 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory)] [string] $ResourceGroupName,
-    [Parameter(Mandatory)] [string] $StaticWebAppName,
-    [Parameter(Mandatory)] [string] $StorageAccountName,
+    [Parameter(Mandatory)] [ValidatePattern('^[a-z0-9]{2,10}$')] [string] $BaseName,
+    [ValidateSet("dev", "test", "prod")] [string] $Environment = "dev",
     [string] $Location = "eastus",
-    [string] $AdminGroupName = "$StaticWebAppName-Admins",
-    [string] $UserGroupName = "$StaticWebAppName-Users"
+    [ValidatePattern('^[a-z0-9]{2,4}$')] [string] $LocationCode = "eus",
+    [string] $SubscriptionId
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,10 +27,23 @@ function Get-OrCreateGroup([string] $DisplayName) {
     return $groupId.Trim()
 }
 
+if ($SubscriptionId) { Invoke-Az @("account", "set", "--subscription", $SubscriptionId) }
 Invoke-Az @("account", "show", "--output", "none")
-Invoke-Az @("group", "create", "--name", $ResourceGroupName, "--location", $Location, "--output", "none")
+$activeSubscriptionId = (& az account show --query id --output tsv).Trim()
+if ($LASTEXITCODE -ne 0 -or -not $activeSubscriptionId) { throw "Could not resolve the active Azure subscription." }
 
-$deployment = (& az deployment group create --resource-group $ResourceGroupName --template-file (Join-Path $PSScriptRoot "main.bicep") --parameters staticWebAppName=$StaticWebAppName storageAccountName=$StorageAccountName --query properties.outputs --output json | ConvertFrom-Json)
+$uniqueSuffix = ($activeSubscriptionId -replace '-', '').Substring(0, 8).ToLowerInvariant()
+$namePrefix = "$BaseName-$Environment-$LocationCode"
+$compactName = "$BaseName$Environment"
+$resourceGroupName = "rg-$namePrefix"
+$staticWebAppName = "stapp-$namePrefix-$uniqueSuffix"
+$storageAccountName = "st$compactName$uniqueSuffix"
+$adminGroupName = "grp-$namePrefix-admins"
+$userGroupName = "grp-$namePrefix-users"
+
+Invoke-Az @("group", "create", "--name", $resourceGroupName, "--location", $Location, "--output", "none")
+
+$deployment = (& az deployment group create --resource-group $resourceGroupName --template-file (Join-Path $PSScriptRoot "main.bicep") --parameters namePrefix=$namePrefix compactName=$compactName uniqueSuffix=$uniqueSuffix --query properties.outputs --output json | ConvertFrom-Json)
 if ($LASTEXITCODE -ne 0) { throw "Infrastructure deployment failed." }
 
 $tenantId = (& az account show --query tenantId --output tsv).Trim()
@@ -52,11 +64,11 @@ if (-not $appId) {
 Invoke-Az @("ad", "app", "update", "--id", $appId, "--set", "groupMembershipClaims=SecurityGroup")
 $clientSecret = (& az ad app credential reset --id $appId --append --display-name "static-web-app" --query password --output tsv).Trim()
 
-Invoke-Az @("staticwebapp", "appsettings", "set", "--name", $StaticWebAppName, "--resource-group", $ResourceGroupName, "--setting-names", "AZURE_CLIENT_ID=$appId", "AZURE_CLIENT_SECRET=$clientSecret", "ADMIN_GROUP_ID=$adminGroupId", "USER_GROUP_ID=$userGroupId", "STORAGE_ACCOUNT_NAME=$StorageAccountName", "SESSIONS_CONTAINER_NAME=sessions", "--output", "none")
+Invoke-Az @("staticwebapp", "appsettings", "set", "--name", $staticWebAppName, "--resource-group", $resourceGroupName, "--setting-names", "AZURE_CLIENT_ID=$appId", "AZURE_CLIENT_SECRET=$clientSecret", "ADMIN_GROUP_ID=$adminGroupId", "USER_GROUP_ID=$userGroupId", "STORAGE_ACCOUNT_NAME=$storageAccountName", "SESSIONS_CONTAINER_NAME=sessions", "--output", "none")
 
 try {
     Set-Content -Path $configPath -Value ($originalConfig.Replace("__TENANT_ID__", $tenantId)) -NoNewline
-    $deploymentToken = (& az staticwebapp secrets list --name $StaticWebAppName --resource-group $ResourceGroupName --query properties.apiKey --output tsv).Trim()
+    $deploymentToken = (& az staticwebapp secrets list --name $staticWebAppName --resource-group $resourceGroupName --query properties.apiKey --output tsv).Trim()
     Push-Location $projectRoot
     try {
         npx --yes @azure/static-web-apps-cli deploy --app-location app --api-location api --deployment-token $deploymentToken
@@ -68,4 +80,5 @@ try {
 }
 
 Write-Host "Deployment complete: https://$hostname"
-Write-Host "Add people to '$AdminGroupName' or '$UserGroupName' through your Entra tenant's approved membership process."
+Write-Host "Resource group: $resourceGroupName"
+Write-Host "Add people to '$adminGroupName' or '$userGroupName' through your Entra tenant's approved membership process."

@@ -1,11 +1,10 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory)] [string] $ResourceGroupName,
-    [Parameter(Mandatory)] [string] $StaticWebAppName,
-    [Parameter(Mandatory)] [string] $StorageAccountName,
+    [Parameter(Mandatory)] [ValidatePattern('^[a-z0-9]{2,10}$')] [string] $BaseName,
+    [ValidateSet("dev", "test", "prod")] [string] $Environment = "dev",
     [string] $Location = "eastus",
-    [string] $AdminGroupName = "$StaticWebAppName-Admins",
-    [string] $UserGroupName = "$StaticWebAppName-Users"
+    [ValidatePattern('^[a-z0-9]{2,4}$')] [string] $LocationCode = "eus",
+    [string] $SubscriptionId
 )
 
 $ErrorActionPreference = "Stop"

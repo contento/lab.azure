@@ -1,14 +1,11 @@
 @description('Azure region for the resources.')
 param location string = resourceGroup().location
 
-@description('Globally unique name for the Static Web App.')
-param staticWebAppName string
+@description('Lowercase application, environment, and region prefix used for every resource name.')
+param namePrefix string
 
-@description('Globally unique Container Apps environment name.')
-param containerAppsEnvironmentName string
-
-@description('Container App name.')
-param apiName string
+@description('Subscription-derived suffix used for globally unique resource names.')
+param uniqueSuffix string
 
 @description('Container image, including registry path and tag.')
 param apiImage string
@@ -27,7 +24,7 @@ param registryPassword string
 param allowedOrigin string
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
-  name: '${containerAppsEnvironmentName}-logs'
+  name: 'log-${namePrefix}'
   location: location
   properties: {
     sku: { name: 'PerGB2018' }
@@ -36,7 +33,7 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09
 }
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' = {
-  name: containerAppsEnvironmentName
+  name: 'cae-${namePrefix}'
   location: location
   properties: {
     appLogsConfiguration: {
@@ -50,7 +47,7 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01'
 }
 
 resource api 'Microsoft.App/containerApps@2024-03-01' = {
-  name: apiName
+  name: 'ca-${namePrefix}-api'
   location: location
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
@@ -97,7 +94,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
-  name: staticWebAppName
+  name: 'stapp-${namePrefix}-${uniqueSuffix}'
   location: location
   sku: { name: 'Standard', tier: 'Standard' }
 }

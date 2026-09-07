@@ -35,8 +35,8 @@ From this module root:
 ```text
 ./start-local.sh
 pwsh ./start-local.ps1
-./deploy.sh <resource-group> <static-web-app-name> <container-apps-environment-name> <api-name> <container-registry-name>
-pwsh ./deploy.ps1 -ResourceGroupName <name> -StaticWebAppName <name> -ContainerAppsEnvironmentName <name> -ApiName <name> -ContainerRegistryName <name>
+./deploy.sh <base-name> [environment] [location] [location-code] [subscription-id]
+pwsh ./deploy.ps1 -BaseName <name> [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
 ```
 
 Compile infrastructure before deployment when Azure CLI is available:
@@ -47,6 +47,8 @@ az bicep build --file ./infra/main.bicep
 
 ## Conventions
 
+- Use a single lowercase alphanumeric base name, 2-10 characters, and derive all Azure resource names from it. Default naming follows Microsoft resource abbreviations: `rg-<base>-<environment>-<region>`, `stapp-<base>-<environment>-<region>-<suffix>`, `cae-<base>-<environment>-<region>`, `ca-<base>-<environment>-<region>-api`, `acr<base><environment><suffix>`, and `log-<base>-<environment>-<region>`.
+- Keep globally unique resource names lowercase and append the deployment's subscription-derived suffix. Do not add hyphens to Container Registry names.
 - Use ESM JavaScript and Node standard-library HTTP APIs unless a library removes meaningful complexity.
 - Keep API routes and their client calls aligned; update `app/config.example.js` and local startup behavior when the endpoint contract changes.
 - Keep test coverage focused on request validation, persistence behavior, CORS, and route contracts.

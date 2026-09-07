@@ -1,17 +1,23 @@
 @description('Azure region for the resources.')
 param location string = resourceGroup().location
 
-@description('Globally unique name for the Static Web App.')
-param staticWebAppName string
+@description('Lowercase application, environment, and region prefix used for resource names.')
+param namePrefix string
 
-@description('Globally unique name for the storage account, 3-24 lowercase alphanumeric characters.')
-param storageAccountName string
+@description('Lowercase application and environment prefix used in Storage account names.')
+@minLength(5)
+param compactName string
+
+@description('Subscription-derived suffix used for globally unique resource names.')
+@minLength(8)
+param uniqueSuffix string
 
 @description('Tags applied to deployed resources.')
 param tags object = {}
 
 var sessionsContainerName = 'sessions'
 var storageBlobDataContributorRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+var storageAccountName = 'st${compactName}${uniqueSuffix}'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName
@@ -41,7 +47,7 @@ resource sessionsContainer 'Microsoft.Storage/storageAccounts/blobServices/conta
 }
 
 resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
-  name: staticWebAppName
+  name: 'stapp-${namePrefix}-${uniqueSuffix}'
   location: location
   tags: tags
   sku: { name: 'Standard', tier: 'Standard' }

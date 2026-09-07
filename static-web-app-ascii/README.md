@@ -38,20 +38,17 @@ Production continues to require a Static Web Apps Entra principal and uses manag
 
 ## Deploy
 
-Choose globally unique values for the Static Web App and storage account names, then run one of the root-level deployment helpers. Each invocation provisions or updates the Azure resources, configures the Entra integration, and publishes both `app/` and `api/`.
+Choose one lowercase alphanumeric base name, then run one of the root-level deployment helpers. Each invocation provisions or updates the Azure resources, configures the Entra integration, and publishes both `app/` and `api/`.
 
 ```bash
-./deploy.sh rg-typecast-dev typecast-your-unique-name typecastunique123
+./deploy.sh typecast
 ```
 
 ```powershell
-pwsh ./deploy.ps1 `
-  -ResourceGroupName rg-typecast-dev `
-  -StaticWebAppName typecast-your-unique-name `
-  -StorageAccountName typecastunique123
+pwsh ./deploy.ps1 -BaseName typecast
 ```
 
-The script provisions the Standard Static Web App, Storage account, sessions container, and Blob RBAC assignment from `infra/main.bicep`. It then creates or reuses two Entra security groups, configures a single-tenant app registration with group claims, sets the required Static Web App application settings, and deploys `app/` plus `api/` using a deployment token held only in process memory.
+The default deployment names are `rg-typecast-dev-eus`, `stapp-typecast-dev-eus-<subscription-suffix>`, `sttypecastdev<subscription-suffix>`, `grp-typecast-dev-eus-admins`, `grp-typecast-dev-eus-users`, and `app-typecast-dev-eus-swa`. Use optional environment, Azure region, region code, and subscription ID arguments to override the defaults. The script provisions the Standard Static Web App, Storage account, sessions container, and Blob RBAC assignment from `infra/main.bicep`. It then creates or reuses two Entra security groups, configures a single-tenant app registration with group claims, sets the required Static Web App application settings, and deploys `app/` plus `api/` using a deployment token held only in process memory.
 
 Add people to the reported `*-Admins` or `*-Users` group using your tenant's approved membership process. Group changes can require a fresh sign-in before new claims are visible.
 

@@ -19,11 +19,11 @@ The scripts start the Node API on `http://localhost:7071` and use Static Web App
 The deployment helper builds the API image in Azure Container Registry, deploys it to Azure Container Apps, creates or updates the Static Web App, restricts API CORS to the web app origin, generates the deployed API URL for the client, and publishes the static client.
 
 ```bash
-./deploy.sh rg-typecast-dev typecast-web-unique typecast-env typecast-api typecastregistry
+./deploy.sh typecast
 ```
 
 ```powershell
-pwsh ./deploy.ps1 -ResourceGroupName rg-typecast-dev -StaticWebAppName typecast-web-unique -ContainerAppsEnvironmentName typecast-env -ApiName typecast-api -ContainerRegistryName typecastregistry
+pwsh ./deploy.ps1 -BaseName typecast
 ```
 
-The deployment requires Azure CLI login, PowerShell 7+, Node.js 20 or 22 LTS, and globally unique names for the Static Web App and container registry. The current API persists sessions to its Container Apps local filesystem and is appropriate for development demonstrations; use durable external storage before running multiple replicas or depending on retained production history.
+The default deployment names are `rg-typecast-dev-eus`, `stapp-typecast-dev-eus-<subscription-suffix>`, `cae-typecast-dev-eus`, `ca-typecast-dev-eus-api`, `acrtypecastdev<subscription-suffix>`, and `log-typecast-dev-eus`. Use optional environment, Azure region, region code, and subscription ID arguments to override the defaults. The deployment requires Azure CLI login, PowerShell 7+, Node.js 20 or 22 LTS. The current API persists sessions to its Container Apps local filesystem and is appropriate for development demonstrations; use durable external storage before running multiple replicas or depending on retained production history.
