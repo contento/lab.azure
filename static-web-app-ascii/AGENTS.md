@@ -31,8 +31,8 @@ Run from the module root when Azure CLI is available:
 
 ```text
 az bicep build --file ./infra/main.bicep
-pwsh ./deploy.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
-./deploy.sh [base-name] [environment] [location] [location-code] [subscription-id]
+pwsh ./deploy-app.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
+./deploy-app.sh [base-name] [environment] [location] [location-code] [subscription-id]
 ```
 
 ## Conventions
@@ -42,5 +42,5 @@ pwsh ./deploy.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Location <az
 - Use ESM JavaScript and the Azure Functions v4 programming model.
 - Keep tests focused in `api/test/` and cover authentication, authorization, input validation, and ownership boundaries for server-side changes.
 - Use PowerShell 7+ syntax in `infra/deploy-infrastructure.ps1`.
-- The checked-in `app/staticwebapp.config.json` intentionally contains `__TENANT_ID__`. `deploy.ps1` substitutes it only while publishing and restores the template afterward.
+- The checked-in `app/staticwebapp.config.json` intentionally contains `__TENANT_ID__`. `deploy-app.ps1` substitutes it only while publishing and restores the template afterward.
 - Preserve the concise, security-focused explanations in `README.md` when behavior or deployment requirements change.

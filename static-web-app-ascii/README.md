@@ -41,11 +41,11 @@ Production continues to require a Static Web Apps Entra principal and uses manag
 The checked-in `infra/parameters.dev.bicepparam` supplies the default base name (`typecast`), environment (`dev`), location (`eastus2`), region code (`eus2`), and active development subscription. Copy `infra/parameters.template.bicepparam` for a future subscription or environment. Run either root-level deployment helper with no arguments to provision or update Azure resources, configure Entra integration, and publish both `app/` and `api/`.
 
 ```bash
-./deploy.sh
+./deploy-app.sh
 ```
 
 ```powershell
-pwsh ./deploy.ps1
+pwsh ./deploy-app.ps1
 ```
 
 The default deployment names are `rg-typecast-dev-eus2`, `stapp-typecast-dev-eus2-<subscription-suffix>`, `sttypecastdev<subscription-suffix>`, `grp-typecast-dev-eus2-admins`, `grp-typecast-dev-eus2-users`, and `app-typecast-dev-eus2-swa`. Both helpers accept optional positional shell arguments or PowerShell parameters to override the base name, environment, Azure region, region code, and subscription ID. The script provisions the Standard Static Web App, Storage account, sessions container, and Blob RBAC assignment from `infra/main.bicep`. It then creates or reuses two Entra security groups, configures a single-tenant app registration with group claims, sets the required Static Web App application settings, and deploys `app/` plus `api/` using a deployment token held only in process memory.
@@ -65,5 +65,5 @@ Then run the deployment script against a non-production resource group. Verify b
 ## Security notes
 
 - Do not commit `api/local.settings.json`, deployment tokens, or Entra client secrets.
-- `staticwebapp.config.json` contains a deployment-time tenant placeholder. `deploy.ps1` replaces it only while publishing and restores the checked-in template immediately afterward.
+- `staticwebapp.config.json` contains a deployment-time tenant placeholder. `deploy-app.ps1` replaces it only while publishing and restores the checked-in template immediately afterward.
 - This lab's two-group claim configuration is suitable for normal memberships. Large Entra group claim sets can trigger claim overage and should use a Microsoft Graph role-resolution design in production.
