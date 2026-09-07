@@ -62,6 +62,10 @@ export function isSessionOwner(session, principal) {
 }
 
 export function resolveRoles(principal, adminGroupId, userGroupId) {
+  if (isLocalDevelopment()) {
+    return principal.roles;
+  }
+
   const normalizedGroups = new Set(principal.groups.map((group) => group.toLowerCase()));
   const roles = ["authenticated"];
 

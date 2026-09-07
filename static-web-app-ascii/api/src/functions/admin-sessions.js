@@ -5,7 +5,7 @@ import { listAllSessions } from "../services/session-store.js";
 app.http("adminSessions", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "admin/sessions",
+  route: "sessions/admin",
   handler: async (request) => {
     try {
       const principal = requirePrincipal(request);

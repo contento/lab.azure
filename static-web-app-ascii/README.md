@@ -22,24 +22,30 @@ The deployment script downloads the Static Web Apps CLI through `npx`; no global
 
 ## Local development
 
-```powershell
-cd api
-npm install
-npm test
-Copy-Item local.settings.example.json local.settings.json
-npx --package @azure/static-web-apps-cli swa start ../app --api-location . --swa-config-location ../local
+Run one of the local helpers from the project root. Each creates `api/local.settings.json` from the local-only template when it is absent, installs API dependencies when needed, and starts the emulator at `http://localhost:4280`.
+
+```bash
+./start-local.sh
 ```
 
-The checked-in local settings enable a fixed local developer identity and write session JSON to `api/.sessions/`; neither Microsoft Entra ID nor Azure Storage is used during this workflow. `local/staticwebapp.config.json` keeps API routes open for the local server only. Do not use it for deployment.
+```powershell
+pwsh ./start-local.ps1
+```
+
+The local helpers require Node.js 20 or 22 LTS, npm, and Azure Functions Core Tools v4 (`func`). They start `func` directly and configure SWA to proxy API requests to it, avoiding the SWA CLI's automatic Core Tools download. The checked-in local settings enable a fixed local developer identity and write session JSON to `api/.sessions/`; neither Microsoft Entra ID nor Azure Storage is used during this workflow. `local/staticwebapp.config.json` keeps API routes open for the local server only. Do not use it for deployment.
 
 Production continues to require a Static Web Apps Entra principal and uses managed-identity Blob access. Deploy to a test environment to validate real group claims and managed-identity behavior.
 
 ## Deploy
 
-Choose globally unique values for the Static Web App and storage account names, then run:
+Choose globally unique values for the Static Web App and storage account names, then run one of the root-level deployment helpers. Each invocation provisions or updates the Azure resources, configures the Entra integration, and publishes both `app/` and `api/`.
+
+```bash
+./deploy.sh rg-typecast-dev typecast-your-unique-name typecastunique123
+```
 
 ```powershell
-pwsh ./infra/deploy.ps1 `
+pwsh ./deploy.ps1 `
   -ResourceGroupName rg-typecast-dev `
   -StaticWebAppName typecast-your-unique-name `
   -StorageAccountName typecastunique123

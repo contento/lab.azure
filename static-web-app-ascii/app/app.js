@@ -62,7 +62,7 @@ async function loadHistory() {
   renderHistory(elements.history, sessions, true);
   elements.historyEmpty.hidden = sessions.length > 0;
   if (state.isAdmin) {
-    const allSessions = await request("/api/admin/sessions");
+    const allSessions = await request("/api/sessions/admin");
     renderHistory(elements.adminHistory, allSessions, false);
     elements.adminEmpty.hidden = allSessions.length > 0;
   }

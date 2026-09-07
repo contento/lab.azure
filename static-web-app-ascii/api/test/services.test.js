@@ -65,21 +65,25 @@ test("uses a fixed local principal and filesystem session store in local develop
   const previousEnvironment = {
     LOCAL_DEVELOPMENT: process.env.LOCAL_DEVELOPMENT,
     LOCAL_USER_ID: process.env.LOCAL_USER_ID,
+    LOCAL_USER_ROLES: process.env.LOCAL_USER_ROLES,
     SESSION_STORE: process.env.SESSION_STORE,
     SESSIONS_FILE_SYSTEM_PATH: process.env.SESSIONS_FILE_SYSTEM_PATH
   };
 
   process.env.LOCAL_DEVELOPMENT = "true";
   process.env.LOCAL_USER_ID = "local-test-user";
+  process.env.LOCAL_USER_ROLES = "authenticated,user,admin";
   process.env.SESSION_STORE = "filesystem";
   process.env.SESSIONS_FILE_SYSTEM_PATH = directory;
 
   try {
-    assert.deepEqual(getPrincipal(new Request("https://example.test/api/sessions")), {
+    const principal = getPrincipal(new Request("https://example.test/api/sessions"));
+    assert.deepEqual(principal, {
       objectId: "local-test-user",
       roles: ["authenticated", "user", "admin"],
       groups: []
     });
+    assert.deepEqual(resolveRoles(principal), ["authenticated", "user", "admin"]);
 
     const session = {
       id: "00000000-0000-4000-8000-000000000001",
