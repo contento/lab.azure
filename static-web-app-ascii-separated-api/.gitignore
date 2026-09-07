@@ -2,3 +2,5 @@ api/node_modules/
 api/.sessions/
 app/config.js
 .swa/
+infra/parameters.dev.bicepparam
+*.dev.bicepparam

@@ -35,8 +35,10 @@ From this module root:
 ```text
 ./start-local.sh
 pwsh ./start-local.ps1
-./deploy.sh <base-name> [environment] [location] [location-code] [subscription-id]
-pwsh ./deploy.ps1 -BaseName <name> [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
+./deploy-code.sh [base-name] [environment] [location] [location-code] [subscription-id]
+pwsh ./deploy-code.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
+./infra/deploy-infrastructure.sh [base-name] [environment] [location] [location-code] [subscription-id]
+pwsh ./infra/deploy-infrastructure.ps1 [-BaseName <name>] [-Environment dev|test|prod] [-Location <azure-region>] [-LocationCode <region-code>] [-SubscriptionId <subscription-id>]
 ```
 
 Compile infrastructure before deployment when Azure CLI is available:

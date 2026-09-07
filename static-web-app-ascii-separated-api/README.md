@@ -16,14 +16,28 @@ The scripts start the Node API on `http://127.0.0.1:7072` and use Static Web App
 
 ## Deploy
 
-The deployment helper builds the API image in Azure Container Registry, deploys it to Azure Container Apps, creates or updates the Static Web App, restricts API CORS to the web app origin, generates the deployed API URL for the client, and publishes the static client.
+The checked-in `infra/parameters.dev.bicepparam` supplies the default base name (`asciitype`), environment (`dev`), location (`eastus2`), region code (`eus2`), and active development subscription. Copy `infra/parameters.template.bicepparam` for a future subscription or environment.
+
+### 1. Code deployment (`app/` and `api/`)
+Builds and updates the API image in Azure Container Apps, generates client endpoint configuration, and publishes the static client:
 
 ```bash
-./deploy.sh typecast
+./deploy-code.sh
 ```
 
 ```powershell
-pwsh ./deploy.ps1 -BaseName typecast
+pwsh ./deploy-code.ps1
 ```
 
-The default deployment names are `rg-typecast-dev-eus`, `stapp-typecast-dev-eus-<subscription-suffix>`, `cae-typecast-dev-eus`, `ca-typecast-dev-eus-api`, `acrtypecastdev<subscription-suffix>`, and `log-typecast-dev-eus`. Use optional environment, Azure region, region code, and subscription ID arguments to override the defaults. The deployment requires Azure CLI login, PowerShell 7+, Node.js 20 or 22 LTS. The current API persists sessions to its Container Apps local filesystem and is appropriate for development demonstrations; use durable external storage before running multiple replicas or depending on retained production history.
+### 2. Infrastructure deployment
+Provision or update Azure Resource Groups, Container Registries, Container Apps Environments, Container Apps, Log Analytics, and Static Web Apps:
+
+```bash
+./infra/deploy-infrastructure.sh
+```
+
+```powershell
+pwsh ./infra/deploy-infrastructure.ps1
+```
+
+The default deployment names are `rg-asciitype-dev-eus2`, `stapp-asciitype-dev-eus2-<subscription-suffix>`, `cae-asciitype-dev-eus2`, `ca-asciitype-dev-eus2-api`, `acrasciitypedev<subscription-suffix>`, and `log-asciitype-dev-eus2`. Both helpers accept optional positional shell arguments or PowerShell parameters to override the base name, environment, Azure region, region code, and subscription ID.

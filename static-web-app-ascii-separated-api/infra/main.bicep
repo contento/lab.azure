@@ -1,11 +1,26 @@
+@description('Lowercase application base name used for resource names.')
+@minLength(2)
+@maxLength(10)
+param baseName string
+
+@description('Deployment environment used for resource names.')
+@allowed([
+  'dev'
+  'test'
+  'prod'
+])
+param environment string
+
 @description('Azure region for the resources.')
 param location string = resourceGroup().location
 
-@description('Lowercase application, environment, and region prefix used for every resource name.')
-param namePrefix string
+@description('Lowercase region code used for resource names.')
+@minLength(2)
+@maxLength(4)
+param locationCode string
 
-@description('Subscription-derived suffix used for globally unique resource names.')
-param uniqueSuffix string
+@description('Subscription ID used to derive globally unique resource-name suffixes.')
+param subscriptionId string
 
 @description('Container image, including registry path and tag.')
 param apiImage string
@@ -22,6 +37,9 @@ param registryPassword string
 
 @description('The Static Web App hostname allowed to call the API.')
 param allowedOrigin string
+
+var uniqueSuffix = substring(replace(subscriptionId, '-', ''), 0, 8)
+var namePrefix = '${baseName}-${environment}-${locationCode}'
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: 'log-${namePrefix}'
