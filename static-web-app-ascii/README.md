@@ -12,13 +12,105 @@ Typecast is a plain HTML, CSS, and JavaScript application hosted by Azure Static
 
 ## Prerequisites
 
-- Node.js 20 or 22 LTS and npm
-- Azure CLI, authenticated with `az login`
-- PowerShell 7+
+Install these tools before running any helper script:
+
+- Node.js 20 or 22 LTS, including npm
+- Azure CLI (`az`)
+- Azure Functions Core Tools v4 (`func`) for local development
+- PowerShell 7+ (`pwsh`)
 - An Azure subscription where you can create resource groups, Static Web Apps, Storage accounts, and role assignments
 - Microsoft Entra permissions to create app registrations, create groups, and configure group claims. Tenant policy may require an Entra administrator to perform these steps.
 
-The deployment script downloads the Static Web Apps CLI through `npx`; no global SWA CLI installation is required.
+The deployment scripts download the Static Web Apps CLI through `npx`; no global SWA CLI installation is required. The Azure CLI includes Bicep support; the verification commands below install or update the Bicep CLI on demand.
+
+### Install on macOS with Bash
+
+These commands use Homebrew. Install Homebrew first from [brew.sh](https://brew.sh/) if `brew` is not available.
+
+```bash
+brew install node@22 azure-cli powershell
+brew tap azure/functions
+brew install azure-functions-core-tools@4
+```
+
+If Homebrew does not add Node.js 22 to `PATH`, run the shell-specific command it prints, or add it for the current shell:
+
+```bash
+echo 'export PATH="/opt/homebrew/opt/node@22/bin:$PATH"' >> ~/.zshrc
+export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
+```
+
+On an Intel Mac, replace `/opt/homebrew` with `/usr/local`.
+
+### Install on Windows 11 with PowerShell
+
+Open PowerShell 7 as a normal user. Install the tools with `winget`:
+
+```powershell
+winget install --id OpenJS.NodeJS.LTS --exact
+winget install --id Microsoft.AzureCLI --exact
+winget install --id Microsoft.Azure.FunctionsCoreTools --exact
+winget install --id Microsoft.PowerShell --exact
+```
+
+Close and reopen PowerShell after installation so the new commands are added to `PATH`. If local script execution is restricted, allow signed local scripts for your user account:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+Run the project scripts from the repository root with PowerShell 7:
+
+```powershell
+pwsh ./start-local.ps1
+pwsh ./deploy-code.ps1
+pwsh ./infra/deploy-infrastructure.ps1
+pwsh ./add-user.ps1 -User <email-or-upn> -Role user
+```
+
+The `.sh` wrappers are not required for Windows PowerShell use. Use Windows Subsystem for Linux only when you specifically need the Bash wrappers; install the prerequisites inside that Linux environment as well.
+
+### Verify and authenticate
+
+Run the Bash form in a shell:
+
+```bash
+az version
+az bicep install
+az bicep version
+func --version
+node --version
+npm --version
+pwsh --version
+az login
+az account show
+```
+
+Run the equivalent PowerShell form in `pwsh`:
+
+```powershell
+az version
+az bicep install
+az bicep version
+func --version
+node --version
+npm --version
+pwsh --version
+az login
+az account show
+```
+
+Select the intended subscription before deployment when more than one is available:
+
+```bash
+az account set --subscription <subscription-id-or-name>
+```
+
+```powershell
+az account set --subscription <subscription-id-or-name>
+```
+
+The `.sh` wrappers call the corresponding `.ps1` scripts through `pwsh`, so Bash users need PowerShell 7 even when they never open a PowerShell prompt. The local helpers require `func`; the deployment and role-assignment helpers require `az` and `pwsh`.
 
 ## Local development
 
